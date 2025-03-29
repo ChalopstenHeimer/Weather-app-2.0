@@ -127,27 +127,35 @@ function displayForecast(data) {
   const forecastDiv = document.getElementById("forecast");
   forecastDiv.innerHTML = ""; // Clear previous forecast
 
-  // Show only one forecast per day (OpenWeather provides 3-hour intervals)
+  // Get current unit from your toggle system
+  const unitSymbol = currentUnit === 'celsius' ? '°C' : '°F';
+  
   const dailyForecasts = data.list.filter((item, index) => index % 8 === 0);
 
   dailyForecasts.forEach(day => {
     const date = new Date(day.dt * 1000).toLocaleDateString("en-US", { weekday: "short" });
-    const temp = Math.round(day.main.temp);
     const icon = `https://openweathermap.org/img/wn/${day.weather[0].icon}.png`;
+    
+    // Convert temperature based on current unit
+    const temp = currentUnit === 'celsius' 
+      ? Math.round(day.main.temp)
+      : Math.round((day.main.temp * 9/5) + 32);
 
     const card = document.createElement("div");
     card.className = "forecast-card";
     card.innerHTML = `
-          <p><strong>${date}</strong></p>
-          <img src="${icon}" alt="${day.weather[0].description}">
-          <p>🌡️ Temp: ${temp}${unitSymbol}</p>
-          <p>${day.weather[0].main}</p>
-      `;
+      <p><strong>${date}</strong></p>
+      <img src="${icon}" alt="${day.weather[0].description}">
+      <p>${temp}${unitSymbol}</p>
+      <p>${day.weather[0].main}</p>
+    `;
     forecastDiv.appendChild(card);
   });
 }
 
-// Add this at the bottom of script.js
+
+
+
 function getUserLocation() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
