@@ -1,12 +1,12 @@
 const fetch = require('node-fetch');
 
 exports.handler = async (event) => {
-  const { city } = event.queryStringParameters;
+  const { lat, lon } = event.queryStringParameters;
   const API_KEY = process.env.OPENWEATHER_API_KEY;
   
   try {
     const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
+      `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
     );
     
     if (!response.ok) {

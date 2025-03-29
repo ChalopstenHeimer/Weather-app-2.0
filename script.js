@@ -1,5 +1,5 @@
-const API_KEY = "55993df853a4352ca64d1faa230648ac"; // Replace with your key
-
+//const API_KEY = "55993df853a4352ca64d1faa230648ac";
+/*
 async function getWeather(city) {
   showLoading();
   const cacheKey = `weather_${city.toLowerCase()}`;
@@ -33,6 +33,39 @@ async function getWeather(city) {
   } catch (error) {
     showError(ERROR_TYPES.WEATHER_API, `Weather data failed: ${error.message}`);
     alert("City not found!");
+  } finally {
+    hideLoading();
+  }
+}
+  */
+
+async function getWeather(city) {
+  showLoading();
+  const cacheKey = `weather_${city.toLowerCase()}`;
+  const cachedData = getCachedWeather(cacheKey);
+
+  if (cachedData) {
+    displayWeather(cachedData);
+    initRadarMap(cachedData.coord.lat, cachedData.coord.lon);
+    getForecast(cachedData.coord.lat, cachedData.coord.lon);
+    hideLoading();
+    return;
+  }
+
+  try {
+    const response = await fetch(`/.netlify/functions/weather?city=${city}`);
+    
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    cacheWeather(cacheKey, data);
+    displayWeather(data);
+    initRadarMap(data.coord.lat, data.coord.lon);
+    getForecast(data.coord.lat, data.coord.lon);
+  } catch (error) {
+    showError(ERROR_TYPES.WEATHER_API, `Weather data failed: ${error.message}`);
   } finally {
     hideLoading();
   }
@@ -94,9 +127,10 @@ function initRadarMap(lat, lon) {
 async function getWeather(city) {
   showLoading();
   try {
-    const response = await fetch(
+    /*const response = await fetch(
       `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
-    );
+    );*/
+    const response = await fetch(`/.netlify/functions/weather?city=${city}`);
     const data = await response.json();
     displayWeather(data);
     initRadarMap(data.coord.lat, data.coord.lon); // Add radar for location
@@ -107,7 +141,7 @@ async function getWeather(city) {
     hideLoading();
   }
 }
-
+/*
 async function getForecast(lat, lon) {
   showLoading();
   try {
@@ -118,6 +152,25 @@ async function getForecast(lat, lon) {
     displayForecast(data);
   } catch (error) {
     console.error("Error fetching forecast:", error);
+  } finally {
+    hideLoading();
+  }
+}
+  */
+
+async function getForecast(lat, lon) {
+  showLoading();
+  try {
+    const response = await fetch(`/.netlify/functions/forecast?lat=${lat}&lon=${lon}`);
+    
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    displayForecast(data);
+  } catch (error) {
+    showError(ERROR_TYPES.FORECAST_API, `Forecast data failed: ${error.message}`);
   } finally {
     hideLoading();
   }
