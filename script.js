@@ -1,4 +1,4 @@
-const API_KEY = "process.env.OPENWEATHER_API_KEY"; // Replace with your key
+const API_KEY = "55993df853a4352ca64d1faa230648ac"; // Replace with your key
 
 async function getWeather(city) {
   showLoading();
