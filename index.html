@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App with Radar</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div id="loading-spinner" class="spinner"></div>
+<div id="loading-overlay" class="loading-overlay"></div>
+  <div class="container">
+    <h1>Weather Radar</h1>
+    <div class="search-box">
+<button id="location-btn">📍 Use My Location</button>
+      <input type="text" placeholder="Enter city..." id="city-input">
+      <button id="search-btn">Search</button>
+    </div>
+    <!-- Add this near the search box -->
+<div class="unit-toggle">
+  <button id="unit-btn" class="active">°C</button>
+  <button id="unit-btn-f">°F</button>
+</div>
+    <div class="weather-info">
+      <div id="current-weather"></div>
+      <div id="radar-map"></div>
+    </div>
+    <div class="forecast-container">
+      <h2>5-Day Forecast</h2>
+      <div id="forecast"></div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+
+</html>
