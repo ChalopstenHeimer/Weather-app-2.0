@@ -140,7 +140,7 @@ function displayForecast(data) {
     card.innerHTML = `
           <p><strong>${date}</strong></p>
           <img src="${icon}" alt="${day.weather[0].description}">
-          <p>${temp}°C</p>
+          <p>🌡️ Temp: ${temp}${unitSymbol}</p>
           <p>${day.weather[0].main}</p>
       `;
     forecastDiv.appendChild(card);
