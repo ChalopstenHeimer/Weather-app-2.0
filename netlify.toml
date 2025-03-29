@@ -1,0 +1,5 @@
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    X-API-Key = "55993df853a4352ca64d1faa230648ac"

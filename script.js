@@ -1,4 +1,4 @@
-const API_KEY = "process.env.OPENWEATHER_API_KEY"; // Replace with your key
+//const API_KEY = "process.env.OPENWEATHER_API_KEY"; // Replace with your key
 
 async function getWeather(city) {
   showLoading();
@@ -14,9 +14,11 @@ async function getWeather(city) {
   }
 
   try {
-    const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
-    );
+   // const response = await fetch(
+    // `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
+   // );
+   const response = await fetch(`/api/weather?q=${city}&appid=&units=metric`);
+
     if (!response.ok) {
       throw new Error(`API Error: ${response.status}`);
     }
