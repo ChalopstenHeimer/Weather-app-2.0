@@ -14,7 +14,9 @@ async function getWeather(city) {
   }
 
   try {
-    const response = await fetch(`/.netlify/functions/get-weather?city=${encodeURIComponent(city)}`);
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
+    );
     if (!response.ok) {
       throw new Error(`API Error: ${response.status}`);
     }
