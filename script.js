@@ -1,4 +1,4 @@
-const API_KEY = "55993df853a4352ca64d1faa230648ac"; // Replace with your key
+const API_KEY = "process.env.OPENWEATHER_API_KEY"; // Replace with your key
 
 async function getWeather(city) {
   showLoading();
@@ -17,13 +17,19 @@ async function getWeather(city) {
     const response = await fetch(
       `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
     );
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
+    }
     const data = await response.json();
+    if (data.cod !== 200) { // OpenWeatherMap error code
+      throw new Error(data.message || "Weather data unavailable");
+    }
     cacheWeather(cacheKey, data);
     displayWeather(data);
     initRadarMap(data.coord.lat, data.coord.lon);
     getForecast(data.coord.lat, data.coord.lon);
   } catch (error) {
-    console.error("Error fetching weather:", error);
+    showError(ERROR_TYPES.WEATHER_API, `Weather data failed: ${error.message}`);
     alert("City not found!");
   } finally {
     hideLoading();
@@ -33,13 +39,28 @@ async function getWeather(city) {
 function displayWeather(data) {
   const temp = Math.round(convertTemp(data.main.temp, currentUnit));
   const unitSymbol = currentUnit === "celsius" ? "°C" : "°F";
+
+  const sunrise = new Date(data.sys.sunrise * 1000).toLocaleTimeString();
+  const sunset = new Date(data.sys.sunset * 1000).toLocaleTimeString();
+
   const weatherDiv = document.getElementById("current-weather");
   weatherDiv.innerHTML = `
         <h2>${data.name}, ${data.sys.country}</h2>
-        <p>🌡️ Temp: ${temp}${unitSymbol}</p>
-        <p>☁️ Weather: ${data.weather[0].description}</p>
-        <p>💧 Humidity: ${data.main.humidity}%</p>
-        <p>🌬️ Wind: ${data.wind.speed} m/s</p>
+        <div class="weather-grid">
+            <div class="weather-main">
+                <p>🌡️ Temp: ${temp}${unitSymbol}</p>
+                <p>☁️ Feels like: ${Math.round(convertTemp(data.main.feels_like, currentUnit))}${unitSymbol}</p>
+                <p>💧 Humidity: ${data.main.humidity}%</p>
+            </div>
+            <div class="weather-details">
+                <p>🌅 Sunrise: ${sunrise}</p>
+                <p>🌇 Sunset: ${sunset}</p>
+                <p>📊 Pressure: ${data.main.pressure} hPa</p>
+                <p>🌬️ Wind: ${data.wind.speed} m/s (${data.wind.deg}°)</p>
+                <p>👁️ Visibility: ${(data.visibility / 1000).toFixed(1)} km</p>
+            </div>
+        </div>
+        <p class="weather-description">${data.weather[0].main}: ${data.weather[0].description}</p>
     `;
 }
 
@@ -227,3 +248,76 @@ document.getElementById("unit-btn-f").addEventListener("click", () => {
   document.getElementById("unit-btn").classList.remove("active");
   updateAllTemperatures();
 });
+
+// Error types
+const ERROR_TYPES = {
+  GEOLOCATION: "geolocation",
+  WEATHER_API: "weather_api",
+  FORECAST_API: "forecast_api",
+  RADAR: "radar"
+};
+
+// Error display element (add to HTML)
+function showError(type, message) {
+  const errorDiv = document.getElementById("error-display") || createErrorDisplay();
+  errorDiv.innerHTML = `
+      <div class="error-message ${type}">
+          ⚠️ ${message}
+          <button class="close-error">✕</button>
+      </div>
+  `;
+  errorDiv.style.display = "block";
+
+  // Auto-hide after 5 seconds
+  setTimeout(() => {
+    errorDiv.style.display = "none";
+  }, 5000);
+}
+
+function createErrorDisplay() {
+  const div = document.createElement("div");
+  div.id = "error-display";
+  div.style.position = "fixed";
+  div.style.top = "20px";
+  div.style.right = "20px";
+  div.style.zIndex = "2000";
+  document.body.appendChild(div);
+  return div;
+}
+
+let touchStartY = 0;
+
+document.addEventListener("touchstart", (e) => {
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener("touchmove", (e) => {
+  const touchY = e.touches[0].clientY;
+  const pullDistance = touchY - touchStartY;
+
+  // Only trigger if pulled down from top
+  if (window.scrollY === 0 && pullDistance > 50) {
+    refreshWeather();
+    e.preventDefault(); // Prevent overscroll
+  }
+}, { passive: false });
+
+// Pull to refresh 
+function refreshWeather() {
+  const city = document.getElementById("city-input").value;
+  if (city) {
+    // Clear cache for this city
+    localStorage.removeItem(`weather_${city.toLowerCase()}`);
+    getWeather(city);
+  } else {
+    getUserLocation(); // Refresh current location
+  }
+
+  // Visual feedback
+  const container = document.querySelector(".container");
+  container.style.transform = "translateY(30px)";
+  setTimeout(() => {
+    container.style.transform = "translateY(0)";
+  }, 300);
+}
+
